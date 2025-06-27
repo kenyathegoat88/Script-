@@ -3,7 +3,7 @@ local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
 
--- Crear ScreenGui
+-- Crear GUI
 local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
 screenGui.Name = "TridenteKT7ReachGUI"
 screenGui.ResetOnSpawn = false
@@ -15,55 +15,45 @@ openText.Size = UDim2.new(0, 150, 0, 30)
 openText.Position = UDim2.new(0, 10, 0, 10)
 openText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 openText.TextColor3 = Color3.new(1, 1, 1)
-openText.Visible = true
-openText.AutoButtonColor = false
 openText.Font = Enum.Font.GothamBold
 openText.TextSize = 14
 
 -- Marco principal
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 250, 0, 140)
-mainFrame.Position = UDim2.new(0.5, -125, 0.5, -70)
+mainFrame.Size = UDim2.new(0, 260, 0, 160)
+mainFrame.Position = UDim2.new(0.5, -130, 0.5, -80)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BackgroundTransparency = 0.15
-mainFrame.Visible = true
-mainFrame.ClipsDescendants = true
 mainFrame.BorderSizePixel = 0
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-
--- Borde rainbow animado
-local border = Instance.new("Frame", mainFrame)
-border.Size = UDim2.new(1, 4, 1, 4)
-border.Position = UDim2.new(0, -2, 0, -2)
-border.BackgroundTransparency = 1
-border.ZIndex = 0
-
-local borderStroke = Instance.new("UIStroke", border)
-borderStroke.Thickness = 3
-borderStroke.Transparency = 0
-borderStroke.LineJoinMode = Enum.LineJoinMode.Round
-
-local hue = 0
-RunService.Heartbeat:Connect(function()
-    hue = (hue + 1) % 360
-    borderStroke.Color = Color3.fromHSV(hue/360, 1, 1)
-end)
+mainFrame.Visible = true
 
 -- Título
 local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 30)
+title.Size = UDim2.new(1, 0, 0, 35)
 title.Position = UDim2.new(0, 0, 0, 5)
 title.BackgroundTransparency = 1
 title.Text = "Tridente KT7"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 24
+title.TextSize = 28
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextStrokeTransparency = 0.6
+
+-- Subtítulo by kenya
+local subtitle = Instance.new("TextLabel", mainFrame)
+subtitle.Size = UDim2.new(1, 0, 0, 20)
+subtitle.Position = UDim2.new(0, 0, 0, 40)
+subtitle.BackgroundTransparency = 1
+subtitle.Text = "by kenya"
+subtitle.Font = Enum.Font.GothamItalic
+subtitle.TextSize = 18
+subtitle.TextColor3 = Color3.fromRGB(180, 180, 180)
+subtitle.TextStrokeTransparency = 0.8
 
 -- Label alcance
 local label = Instance.new("TextLabel", mainFrame)
 label.Size = UDim2.new(1, -40, 0, 25)
-label.Position = UDim2.new(0, 10, 0, 45)
+label.Position = UDim2.new(0, 10, 0, 70)
 label.BackgroundTransparency = 1
 label.Text = "Alcance (Reach):"
 label.Font = Enum.Font.GothamSemibold
@@ -74,7 +64,7 @@ label.TextXAlignment = Enum.TextXAlignment.Left
 -- Input alcance
 local reachInput = Instance.new("TextBox", mainFrame)
 reachInput.Size = UDim2.new(0, 80, 0, 25)
-reachInput.Position = UDim2.new(1, -90, 0, 45)
+reachInput.Position = UDim2.new(1, -90, 0, 70)
 reachInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 reachInput.TextColor3 = Color3.fromRGB(255, 255, 255)
 reachInput.Font = Enum.Font.Gotham
@@ -85,12 +75,12 @@ reachInput.TextXAlignment = Enum.TextXAlignment.Center
 
 -- Botón activar/desactivar
 local reachBtn = Instance.new("TextButton", mainFrame)
-reachBtn.Size = UDim2.new(1, -20, 0, 40)
-reachBtn.Position = UDim2.new(0, 10, 0, 80)
+reachBtn.Size = UDim2.new(1, -20, 0, 45)
+reachBtn.Position = UDim2.new(0, 10, 0, 105)
 reachBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 reachBtn.TextColor3 = Color3.new(1, 1, 1)
 reachBtn.Font = Enum.Font.GothamBold
-reachBtn.TextSize = 20
+reachBtn.TextSize = 22
 reachBtn.Text = "✅ Activar Reach"
 
 local reachActive = false
@@ -114,22 +104,22 @@ reachBtn.MouseButton1Click:Connect(function()
         if leg then
             local sizeValue = tonumber(reachInput.Text)
             if not sizeValue or sizeValue < 1 then
-                sizeValue = 6 -- valor por defecto
+                sizeValue = 6
             end
             reachPart = Instance.new("Part", Character)
             reachPart.Size = Vector3.new(4, 4, sizeValue)
             reachPart.Transparency = 1
             reachPart.Anchored = false
-            reachPart.CanCollide = false -- SIN colisión
+            reachPart.CanCollide = false
             reachPart.Massless = true
             reachPart.Name = "ReachHitbox"
             reachPart.Color = Color3.fromRGB(255, 0, 0)
-            
+
             weld = Instance.new("WeldConstraint", reachPart)
             weld.Part0 = reachPart
             weld.Part1 = leg
-            
-            reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -sizeValue/2)
+
+            reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -sizeValue / 2)
         end
         reachBtn.Text = "❌ Desactivar Reach"
         reachActive = true
