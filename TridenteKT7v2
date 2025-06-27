@@ -1,20 +1,66 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- Crear GUI
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "TridenteKT7_UI"
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 300, 0, 320)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -160)
+Frame.Size = UDim2.new(0, 300, 0, 180)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
 Frame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
 Frame.BackgroundTransparency = 0.1
 Frame.BorderSizePixel = 0
-Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
+local UICorner = Instance.new("UICorner", Frame)
+UICorner.CornerRadius = UDim.new(0, 10)
 
+-- Variables para drag
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function updateDrag(input)
+	local delta = input.Position - dragStart
+	Frame.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+Frame.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = Frame.Position
+
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+Frame.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		updateDrag(input)
+	end
+end)
+
+-- Título
 local Title = Instance.new("TextLabel", Frame)
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundTransparency = 1
@@ -23,6 +69,7 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(30, 30, 30)
 
+-- TextBox Reach
 local Reach = Instance.new("TextBox", Frame)
 Reach.PlaceholderText = "Reach (1-50)"
 Reach.Position = UDim2.new(0.1, 0, 0, 50)
@@ -33,6 +80,7 @@ Reach.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
 Reach.TextColor3 = Color3.fromRGB(0, 0, 0)
 Instance.new("UICorner", Reach).CornerRadius = UDim.new(0, 6)
 
+-- Botón Aplicar Reach
 local ApplyReachBtn = Instance.new("TextButton", Frame)
 ApplyReachBtn.Text = "Aplicar Reach"
 ApplyReachBtn.Position = UDim2.new(0.1, 0, 0, 90)
@@ -43,44 +91,86 @@ ApplyReachBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
 ApplyReachBtn.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", ApplyReachBtn).CornerRadius = UDim.new(0, 6)
 
--- Variables para el reach
-local reachValue = 5 -- valor por defecto
+-- Variables para las hitboxes en ambos pies
+local hitboxDer, hitboxIzq
+local reachValue = 5
 
--- Actualizar reach
+local function crearHitbox(pierna, sizeValue)
+	local box = Instance.new("Part")
+	box.Name = "ReachHitbox_" .. pierna.Name
+	box.Size = Vector3.new(sizeValue, 2, sizeValue)
+	box.Transparency = 1 -- invisible
+	box.CanCollide = false
+	box.Anchored = false
+	box.Massless = true
+	box.Parent = pierna.Parent
+
+	local weld = Instance.new("WeldConstraint")
+	weld.Part0 = pierna
+	weld.Part1 = box
+	weld.Parent = box
+
+	-- Posicionar ligeramente delante del pie
+	box.CFrame = pierna.CFrame * CFrame.new(0, 0, -sizeValue / 2)
+
+	-- Detectar contacto con balón
+	box.Touched:Connect(function(hit)
+		if hit and hit:IsA("BasePart") then
+			local nameLower = hit.Name:lower()
+			if string.find(nameLower, "ball") or hit.Shape == Enum.PartType.Ball then
+				print("¡Balón tocado con reach en " .. pierna.Name .. "!")
+				-- Aquí podés agregar la lógica para pegarle al balón
+			end
+		end
+	end)
+
+	return box
+end
+
+local function crearOActualizarHitboxes(sizeValue)
+	local char = LocalPlayer.Character
+	if not char then return end
+
+	local footR = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
+	local footL = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftLowerLeg")
+
+	if not footR or not footL then
+		warn("No se encontraron ambas partes de pierna.")
+		return
+	end
+
+	-- Destruir hitboxes previas si existen
+	if hitboxDer then hitboxDer:Destroy() end
+	if hitboxIzq then hitboxIzq:Destroy() end
+
+	hitboxDer = crearHitbox(footR, sizeValue)
+	hitboxIzq = crearHitbox(footL, sizeValue)
+end
+
+-- Botón para aplicar reach
 ApplyReachBtn.MouseButton1Click:Connect(function()
 	local val = tonumber(Reach.Text)
 	if val and val >= 1 and val <= 50 then
 		reachValue = val
-		print("Reach actualizado a: " .. reachValue)
+		crearOActualizarHitboxes(reachValue)
+		print("Reach aplicado: " .. reachValue)
 	else
-		warn("Por favor ingresa un número válido entre 1 y 50")
+		warn("Por favor ingresa un número entre 1 y 50")
 	end
 end)
 
--- Función para detectar cualquier balón
-local function checkBallsReach()
+-- Mantener las hitboxes pegadas a los pies cada frame
+RunService.Heartbeat:Connect(function()
 	local char = LocalPlayer.Character
 	if not char then return end
-	local foot = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
-	if not foot then return end
 
-	-- Recorrer todos los objetos en workspace
-	for _, obj in pairs(workspace:GetDescendants()) do
-		if obj:IsA("BasePart") then
-			local nameLower = obj.Name:lower()
-			-- Condición para identificar balones (puedes mejorarla si quieres)
-			if string.find(nameLower, "ball") or obj.Shape == Enum.PartType.Ball then
-				local dist = (foot.Position - obj.Position).Magnitude
-				if dist <= reachValue then
-					print("Balón detectado a alcance! Nombre: ".. obj.Name .. " Distancia: " .. math.floor(dist))
-					-- Aquí activás el toque del balón
-					-- Por ejemplo, llamar a una función o evento de toque
-				end
-			end
-		end
+	local footR = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
+	local footL = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftLowerLeg")
+
+	if hitboxDer and footR then
+		hitboxDer.CFrame = footR.CFrame * CFrame.new(0, 0, -reachValue / 2)
 	end
-end
-
-RunService.Heartbeat:Connect(function()
-	checkBallsReach()
+	if hitboxIzq and footL then
+		hitboxIzq.CFrame = footL.CFrame * CFrame.new(0, 0, -reachValue / 2)
+	end
 end)
