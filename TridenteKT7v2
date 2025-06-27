@@ -2,31 +2,58 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 
--- Crear GUI
 local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
 screenGui.Name = "TridenteKT7ReachGUI"
 screenGui.ResetOnSpawn = false
 
--- Texto flotante para abrir/ocultar GUI
+-- Botón para abrir GUI cuando minimizada o cerrada
 local openText = Instance.new("TextButton", screenGui)
-openText.Text = "📂 Abrir Reach GUI"
+openText.Text = "👹 TridenteKT7"
 openText.Size = UDim2.new(0, 150, 0, 30)
 openText.Position = UDim2.new(0, 10, 0, 10)
 openText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 openText.TextColor3 = Color3.new(1, 1, 1)
 openText.Font = Enum.Font.GothamBold
 openText.TextSize = 14
+openText.Visible = false
+openText.AutoButtonColor = false
 
--- Marco principal
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 260, 0, 160)
-mainFrame.Position = UDim2.new(0.5, -130, 0.5, -80)
+mainFrame.Size = UDim2.new(0, 320, 0, 230)
+mainFrame.Position = UDim2.new(0.5, -160, 0.5, -115)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 0
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Visible = true
+
+-- Variables para arrastrar GUI
+local dragging, dragInput, dragStart, startPos
+local function updatePosition(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X,
+                                  startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+end
+mainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+mainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+        dragInput = input
+    end
+end)
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then updatePosition(input) end
+end)
 
 -- Título
 local title = Instance.new("TextLabel", mainFrame)
@@ -39,7 +66,7 @@ title.TextSize = 28
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextStrokeTransparency = 0.6
 
--- Subtítulo by kenya
+-- Subtítulo
 local subtitle = Instance.new("TextLabel", mainFrame)
 subtitle.Size = UDim2.new(1, 0, 0, 20)
 subtitle.Position = UDim2.new(0, 0, 0, 40)
@@ -50,62 +77,120 @@ subtitle.TextSize = 18
 subtitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 subtitle.TextStrokeTransparency = 0.8
 
--- Label alcance
-local label = Instance.new("TextLabel", mainFrame)
-label.Size = UDim2.new(1, -40, 0, 25)
-label.Position = UDim2.new(0, 10, 0, 70)
-label.BackgroundTransparency = 1
-label.Text = "Alcance (Reach):"
-label.Font = Enum.Font.GothamSemibold
-label.TextSize = 16
-label.TextColor3 = Color3.fromRGB(200, 200, 200)
-label.TextXAlignment = Enum.TextXAlignment.Left
+-- Botones de minimizar y cerrar
+local btnMinimize = Instance.new("TextButton", mainFrame)
+btnMinimize.Size = UDim2.new(0, 60, 0, 25)
+btnMinimize.Position = UDim2.new(1, -140, 0, 10)
+btnMinimize.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+btnMinimize.Text = "Minimizar"
+btnMinimize.Font = Enum.Font.GothamBold
+btnMinimize.TextSize = 14
+btnMinimize.TextColor3 = Color3.new(1,1,1)
+btnMinimize.AutoButtonColor = false
 
--- Input alcance
-local reachInput = Instance.new("TextBox", mainFrame)
-reachInput.Size = UDim2.new(0, 80, 0, 25)
-reachInput.Position = UDim2.new(1, -90, 0, 70)
-reachInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-reachInput.TextColor3 = Color3.fromRGB(255, 255, 255)
-reachInput.Font = Enum.Font.Gotham
-reachInput.TextSize = 16
-reachInput.Text = "6"
-reachInput.ClearTextOnFocus = false
-reachInput.TextXAlignment = Enum.TextXAlignment.Center
+local btnClose = Instance.new("TextButton", mainFrame)
+btnClose.Size = UDim2.new(0, 60, 0, 25)
+btnClose.Position = UDim2.new(1, -70, 0, 10)
+btnClose.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
+btnClose.Text = "Cerrar"
+btnClose.Font = Enum.Font.GothamBold
+btnClose.TextSize = 14
+btnClose.TextColor3 = Color3.new(1,1,1)
+btnClose.AutoButtonColor = false
 
--- Botón activar/desactivar
-local reachBtn = Instance.new("TextButton", mainFrame)
-reachBtn.Size = UDim2.new(1, -20, 0, 45)
-reachBtn.Position = UDim2.new(0, 10, 0, 105)
-reachBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-reachBtn.TextColor3 = Color3.new(1, 1, 1)
-reachBtn.Font = Enum.Font.GothamBold
-reachBtn.TextSize = 22
-reachBtn.Text = "✅ Activar Reach"
+btnMinimize.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    openText.Visible = true
+end)
+btnClose.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    openText.Visible = false
+end)
+openText.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
+    openText.Visible = false
+end)
 
-local reachActive = false
-local reachPart
-local weld
+-- Reach Label y TextBox
+local labelReach = Instance.new("TextLabel", mainFrame)
+labelReach.Size = UDim2.new(0.6, -10, 0, 25)
+labelReach.Position = UDim2.new(0, 10, 0, 70)
+labelReach.BackgroundTransparency = 1
+labelReach.Text = "Alcance (Reach):"
+labelReach.Font = Enum.Font.GothamSemibold
+labelReach.TextSize = 16
+labelReach.TextColor3 = Color3.fromRGB(200, 200, 200)
+labelReach.TextXAlignment = Enum.TextXAlignment.Left
 
-reachBtn.MouseButton1Click:Connect(function()
+local inputReach = Instance.new("TextBox", mainFrame)
+inputReach.Size = UDim2.new(0.35, 0, 0, 25)
+inputReach.Position = UDim2.new(0.6, 0, 0, 70)
+inputReach.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+inputReach.TextColor3 = Color3.fromRGB(255, 255, 255)
+inputReach.Font = Enum.Font.Gotham
+inputReach.TextSize = 16
+inputReach.Text = "6"
+inputReach.ClearTextOnFocus = false
+inputReach.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Botón Reach
+local btnReach = Instance.new("TextButton", mainFrame)
+btnReach.Size = UDim2.new(1, -20, 0, 40)
+btnReach.Position = UDim2.new(0, 10, 0, 105)
+btnReach.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+btnReach.TextColor3 = Color3.new(1, 1, 1)
+btnReach.Font = Enum.Font.GothamBold
+btnReach.TextSize = 20
+btnReach.Text = "✅ Activar Reach"
+
+-- Nuevo Servicio Label y TextBox
+local labelNew = Instance.new("TextLabel", mainFrame)
+labelNew.Size = UDim2.new(0.6, -10, 0, 25)
+labelNew.Position = UDim2.new(0, 10, 0, 150)
+labelNew.BackgroundTransparency = 1
+labelNew.Text = "Alcance (Nuevo Servicio):"
+labelNew.Font = Enum.Font.GothamSemibold
+labelNew.TextSize = 16
+labelNew.TextColor3 = Color3.fromRGB(200, 200, 200)
+labelNew.TextXAlignment = Enum.TextXAlignment.Left
+
+local inputNew = Instance.new("TextBox", mainFrame)
+inputNew.Size = UDim2.new(0.35, 0, 0, 25)
+inputNew.Position = UDim2.new(0.6, 0, 0, 150)
+inputNew.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+inputNew.TextColor3 = Color3.fromRGB(255, 255, 255)
+inputNew.Font = Enum.Font.Gotham
+inputNew.TextSize = 16
+inputNew.Text = "6"
+inputNew.ClearTextOnFocus = false
+inputNew.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Botón Nuevo Servicio
+local btnNew = Instance.new("TextButton", mainFrame)
+btnNew.Size = UDim2.new(1, -20, 0, 40)
+btnNew.Position = UDim2.new(0, 10, 0, 185)
+btnNew.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+btnNew.TextColor3 = Color3.new(1, 1, 1)
+btnNew.Font = Enum.Font.GothamBold
+btnNew.TextSize = 20
+btnNew.Text = "✅ Activar Nuevo Servicio"
+
+-- Variables y lógica para hitboxes
+local reachActive, newActive = false, false
+local reachPart, newPart
+local reachWeld, newWeld
+
+btnReach.MouseButton1Click:Connect(function()
     if reachActive then
-        if reachPart then
-            reachPart:Destroy()
-            reachPart = nil
-        end
-        if weld then
-            weld:Destroy()
-            weld = nil
-        end
-        reachBtn.Text = "✅ Activar Reach"
+        if reachPart then reachPart:Destroy() end
+        if reachWeld then reachWeld:Destroy() end
+        btnReach.Text = "✅ Activar Reach"
         reachActive = false
     else
         local leg = Character:FindFirstChild("RightFoot") or Character:FindFirstChild("Right Leg")
         if leg then
-            local sizeValue = tonumber(reachInput.Text)
-            if not sizeValue or sizeValue < 1 then
-                sizeValue = 6
-            end
+            local sizeValue = tonumber(inputReach.Text)
+            if not sizeValue or sizeValue < 1 then sizeValue = 6 end
             reachPart = Instance.new("Part", Character)
             reachPart.Size = Vector3.new(4, 4, sizeValue)
             reachPart.Transparency = 1
@@ -115,17 +200,44 @@ reachBtn.MouseButton1Click:Connect(function()
             reachPart.Name = "ReachHitbox"
             reachPart.Color = Color3.fromRGB(255, 0, 0)
 
-            weld = Instance.new("WeldConstraint", reachPart)
-            weld.Part0 = reachPart
-            weld.Part1 = leg
+            reachWeld = Instance.new("WeldConstraint", reachPart)
+            reachWeld.Part0 = reachPart
+            reachWeld.Part1 = leg
 
             reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -sizeValue / 2)
+            btnReach.Text = "❌ Desactivar Reach"
+            reachActive = true
         end
-        reachBtn.Text = "❌ Desactivar Reach"
-        reachActive = true
     end
 end)
 
-openText.MouseButton1Click:Connect(function()
-    mainFrame.Visible = not mainFrame.Visible
+btnNew.MouseButton1Click:Connect(function()
+    if newActive then
+        if newPart then newPart:Destroy() end
+        if newWeld then newWeld:Destroy() end
+        btnNew.Text = "✅ Activar Nuevo Servicio"
+        newActive = false
+    else
+        local leg = Character:FindFirstChild("RightFoot") or Character:FindFirstChild("Right Leg")
+        if leg then
+            local sizeValue = tonumber(inputNew.Text)
+            if not sizeValue or sizeValue < 1 then sizeValue = 6 end
+            newPart = Instance.new("Part", Character)
+            newPart.Size = Vector3.new(3, 3, sizeValue)
+            newPart.Transparency = 1
+            newPart.Anchored = false
+            newPart.CanCollide = false
+            newPart.Massless = true
+            newPart.Name = "NewServiceHitbox"
+            newPart.Color = Color3.fromRGB(0, 255, 0)
+
+            newWeld = Instance.new("WeldConstraint", newPart)
+            newWeld.Part0 = newPart
+            newWeld.Part1 = leg
+
+            newPart.CFrame = leg.CFrame * CFrame.new(0, 0, -sizeValue / 2)
+            btnNew.Text = "❌ Desactivar Nuevo Servicio"
+            newActive = true
+        end
+    end
 end)
