@@ -2,10 +2,8 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local leftFoot = character:WaitForChild("LeftFoot")
 
--- Parámetro para modificar alcance (en studs)
 local alcance = 5
 
--- Crear la hitbox visible (verde transparente)
 local hitbox = Instance.new("Part")
 hitbox.Size = Vector3.new(alcance, alcance, alcance)
 hitbox.Transparency = 0.5
@@ -16,39 +14,24 @@ hitbox.Material = Enum.Material.Neon
 hitbox.Name = "LeftFootHitbox"
 hitbox.Parent = character
 
--- Función para aplicar fuerza al balón
 local function patearBalon(balon)
     if balon and balon:IsA("BasePart") then
         local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = (balon.Position - leftFoot.Position).Unit * 100 -- fuerza del golpe, ajusta 100
+        bodyVelocity.Velocity = (balon.Position - leftFoot.Position).Unit * 100
         bodyVelocity.MaxForce = Vector3.new(50000, 50000, 50000)
         bodyVelocity.Parent = balon
-
-        -- Quitar la fuerza después de 0.2 segundos
         game.Debris:AddItem(bodyVelocity, 0.2)
     end
 end
 
--- Actualizar posición de la hitbox
 game:GetService("RunService").RenderStepped:Connect(function()
     if leftFoot and hitbox then
         hitbox.CFrame = leftFoot.CFrame
     end
 end)
 
--- Detectar toque con el balón
 hitbox.Touched:Connect(function(hit)
-    if hit.Name == "Ball" then  -- Asegúrate que el balón se llame exactamente "Ball"
+    if hit.Name == "ball" then
         patearBalon(hit)
     end
 end)
-
--- Función para cambiar el alcance en tiempo real
-local function cambiarAlcance(nuevoAlcance)
-    alcance = nuevoAlcance
-    hitbox.Size = Vector3.new(alcance, alcance, alcance)
-end
-
--- Ejemplo para cambiar alcance tras 10 segundos (opcional)
-wait(10)
-cambiarAlcance(8)
