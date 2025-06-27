@@ -1,64 +1,20 @@
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- Crear GUI
+-- GUI básico
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "TridenteKT7_UI"
 ScreenGui.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame", ScreenGui)
-Frame.Size = UDim2.new(0, 300, 0, 180)
-Frame.Position = UDim2.new(0.5, -150, 0.5, -90)
+Frame.Size = UDim2.new(0, 300, 0, 150)
+Frame.Position = UDim2.new(0.5, -150, 0.5, -75)
 Frame.BackgroundColor3 = Color3.fromRGB(245, 245, 245)
 Frame.BackgroundTransparency = 0.1
 Frame.BorderSizePixel = 0
-local UICorner = Instance.new("UICorner", Frame)
-UICorner.CornerRadius = UDim.new(0, 10)
-
--- Variables para drag
-local dragging
-local dragInput
-local dragStart
-local startPos
-
-local function updateDrag(input)
-	local delta = input.Position - dragStart
-	Frame.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
-end
-
-Frame.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = Frame.Position
-
-		input.Changed:Connect(function()
-			if input.UserInputState == Enum.UserInputState.End then
-				dragging = false
-			end
-		end)
-	end
-end)
-
-Frame.InputChanged:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-		dragInput = input
-	end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-	if input == dragInput and dragging then
-		updateDrag(input)
-	end
-end)
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 10)
 
 -- Título
 local Title = Instance.new("TextLabel", Frame)
@@ -69,108 +25,83 @@ Title.Font = Enum.Font.GothamBold
 Title.TextSize = 22
 Title.TextColor3 = Color3.fromRGB(30, 30, 30)
 
--- TextBox Reach
-local Reach = Instance.new("TextBox", Frame)
-Reach.PlaceholderText = "Reach (1-50)"
-Reach.Position = UDim2.new(0.1, 0, 0, 50)
-Reach.Size = UDim2.new(0.8, 0, 0, 30)
-Reach.Font = Enum.Font.Gotham
-Reach.TextSize = 18
-Reach.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
-Reach.TextColor3 = Color3.fromRGB(0, 0, 0)
-Instance.new("UICorner", Reach).CornerRadius = UDim.new(0, 6)
+-- TextBox para tamaño de la hitbox corporal
+local SizeBox = Instance.new("TextBox", Frame)
+SizeBox.PlaceholderText = "Tamaño de cuerpo (X)"
+SizeBox.Position = UDim2.new(0.1, 0, 0, 50)
+SizeBox.Size = UDim2.new(0.8, 0, 0, 30)
+SizeBox.Font = Enum.Font.Gotham
+SizeBox.TextSize = 18
+SizeBox.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
+SizeBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+Instance.new("UICorner", SizeBox).CornerRadius = UDim.new(0, 6)
 
--- Botón Aplicar Reach
-local ApplyReachBtn = Instance.new("TextButton", Frame)
-ApplyReachBtn.Text = "Aplicar Reach"
-ApplyReachBtn.Position = UDim2.new(0.1, 0, 0, 90)
-ApplyReachBtn.Size = UDim2.new(0.8, 0, 0, 30)
-ApplyReachBtn.Font = Enum.Font.GothamBold
-ApplyReachBtn.TextSize = 18
-ApplyReachBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-ApplyReachBtn.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", ApplyReachBtn).CornerRadius = UDim.new(0, 6)
+-- Botón crear hitbox corporal
+local CreateBodyHitboxBtn = Instance.new("TextButton", Frame)
+CreateBodyHitboxBtn.Text = "Crear Hitbox Cuerpo"
+CreateBodyHitboxBtn.Position = UDim2.new(0.1, 0, 0, 90)
+CreateBodyHitboxBtn.Size = UDim2.new(0.8, 0, 0, 30)
+CreateBodyHitboxBtn.Font = Enum.Font.GothamBold
+CreateBodyHitboxBtn.TextSize = 18
+CreateBodyHitboxBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+CreateBodyHitboxBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", CreateBodyHitboxBtn).CornerRadius = UDim.new(0, 6)
 
--- Variables para las hitboxes en ambos pies
-local hitboxDer, hitboxIzq
-local reachValue = 5
+-- Variable hitbox cuerpo
+local bodyHitbox
 
-local function crearHitbox(pierna, sizeValue)
-	local box = Instance.new("Part")
-	box.Name = "ReachHitbox_" .. pierna.Name
-	box.Size = Vector3.new(sizeValue, 2, sizeValue)
-	box.Transparency = 1 -- invisible
-	box.CanCollide = false
-	box.Anchored = false
-	box.Massless = true
-	box.Parent = pierna.Parent
-
-	local weld = Instance.new("WeldConstraint")
-	weld.Part0 = pierna
-	weld.Part1 = box
-	weld.Parent = box
-
-	-- Posicionar ligeramente delante del pie
-	box.CFrame = pierna.CFrame * CFrame.new(0, 0, -sizeValue / 2)
-
-	-- Detectar contacto con balón
-	box.Touched:Connect(function(hit)
-		if hit and hit:IsA("BasePart") then
-			local nameLower = hit.Name:lower()
-			if string.find(nameLower, "ball") or hit.Shape == Enum.PartType.Ball then
-				print("¡Balón tocado con reach en " .. pierna.Name .. "!")
-				-- Aquí podés agregar la lógica para pegarle al balón
-			end
-		end
-	end)
-
-	return box
-end
-
-local function crearOActualizarHitboxes(sizeValue)
+-- Función para crear o actualizar hitbox cuerpo
+local function createOrUpdateBodyHitbox(sizeValue)
 	local char = LocalPlayer.Character
 	if not char then return end
-
-	local footR = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
-	local footL = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftLowerLeg")
-
-	if not footR or not footL then
-		warn("No se encontraron ambas partes de pierna.")
+	local rootPart = char:FindFirstChild("HumanoidRootPart")
+	if not rootPart then
+		warn("No se encontró HumanoidRootPart.")
 		return
 	end
 
-	-- Destruir hitboxes previas si existen
-	if hitboxDer then hitboxDer:Destroy() end
-	if hitboxIzq then hitboxIzq:Destroy() end
+	if bodyHitbox then
+		bodyHitbox.Size = Vector3.new(sizeValue, sizeValue * 2, sizeValue)
+	else
+		bodyHitbox = Instance.new("Part")
+		bodyHitbox.Name = "BodyReachHitbox"
+		bodyHitbox.Transparency = 0.7
+		bodyHitbox.CanCollide = false
+		bodyHitbox.Anchored = false
+		bodyHitbox.Massless = true
+		bodyHitbox.Color = Color3.fromRGB(0, 255, 0)
+		bodyHitbox.Material = Enum.Material.ForceField
+		bodyHitbox.Parent = char
 
-	hitboxDer = crearHitbox(footR, sizeValue)
-	hitboxIzq = crearHitbox(footL, sizeValue)
+		-- Weld para seguir rootPart
+		local weld = Instance.new("WeldConstraint")
+		weld.Part0 = rootPart
+		weld.Part1 = bodyHitbox
+		weld.Parent = bodyHitbox
+
+		-- Detectar toque con cualquier parte (puedes personalizar)
+		bodyHitbox.Touched:Connect(function(hit)
+			if hit and hit:IsA("BasePart") then
+				local nameLower = hit.Name:lower()
+				if string.find(nameLower, "ball") or hit.Shape == Enum.PartType.Ball then
+					print("¡Balón tocado con hitbox corporal!")
+					-- Lógica para golpear balón acá
+				end
+			end
+		end)
+	end
+
+	bodyHitbox.Size = Vector3.new(sizeValue, sizeValue * 2, sizeValue)
+	bodyHitbox.CFrame = rootPart.CFrame
 end
 
--- Botón para aplicar reach
-ApplyReachBtn.MouseButton1Click:Connect(function()
-	local val = tonumber(Reach.Text)
+-- Botón para crear la hitbox corporal
+CreateBodyHitboxBtn.MouseButton1Click:Connect(function()
+	local val = tonumber(SizeBox.Text)
 	if val and val >= 1 and val <= 50 then
-		reachValue = val
-		crearOActualizarHitboxes(reachValue)
-		print("Reach aplicado: " .. reachValue)
+		createOrUpdateBodyHitbox(val)
+		print("Hitbox corporal aplicada con tamaño: " .. val)
 	else
-		warn("Por favor ingresa un número entre 1 y 50")
-	end
-end)
-
--- Mantener las hitboxes pegadas a los pies cada frame
-RunService.Heartbeat:Connect(function()
-	local char = LocalPlayer.Character
-	if not char then return end
-
-	local footR = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
-	local footL = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftLowerLeg")
-
-	if hitboxDer and footR then
-		hitboxDer.CFrame = footR.CFrame * CFrame.new(0, 0, -reachValue / 2)
-	end
-	if hitboxIzq and footL then
-		hitboxIzq.CFrame = footL.CFrame * CFrame.new(0, 0, -reachValue / 2)
+		warn("Ingrese un tamaño válido entre 1 y 50")
 	end
 end)
