@@ -1,15 +1,14 @@
--- Tridente KT7 - Reach TPS Soccer (GUI Mobile)
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
 
--- GUI
+-- Crear ScreenGui
 local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-screenGui.Name = "ReachGUI"
+screenGui.Name = "TridenteKT7ReachGUI"
 screenGui.ResetOnSpawn = false
 
--- Botón ocultar/mostrar GUI
+-- Texto flotante para abrir/ocultar GUI
 local openText = Instance.new("TextButton", screenGui)
 openText.Text = "📂 Abrir Reach GUI"
 openText.Size = UDim2.new(0, 150, 0, 30)
@@ -17,57 +16,126 @@ openText.Position = UDim2.new(0, 10, 0, 10)
 openText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 openText.TextColor3 = Color3.new(1, 1, 1)
 openText.Visible = true
+openText.AutoButtonColor = false
+openText.Font = Enum.Font.GothamBold
+openText.TextSize = 14
 
 -- Marco principal
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 200, 0, 100)
-mainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
-mainFrame.BackgroundTransparency = 0.3
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.Size = UDim2.new(0, 250, 0, 140)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -70)
+mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+mainFrame.BackgroundTransparency = 0.15
 mainFrame.Visible = true
+mainFrame.ClipsDescendants = true
+mainFrame.BorderSizePixel = 0
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 
--- Botón Reach
-local reachBtn = Instance.new("TextButton", mainFrame)
-reachBtn.Size = UDim2.new(1, -20, 0, 40)
-reachBtn.Position = UDim2.new(0, 10, 0, 30)
-reachBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-reachBtn.TextColor3 = Color3.new(1, 1, 1)
-reachBtn.Text = "✅ Activar Reach"
+-- Borde rainbow animado
+local border = Instance.new("Frame", mainFrame)
+border.Size = UDim2.new(1, 4, 1, 4)
+border.Position = UDim2.new(0, -2, 0, -2)
+border.BackgroundTransparency = 1
+border.ZIndex = 0
 
--- Toggler
-local reachActive = false
-local reachPart
+local borderStroke = Instance.new("UIStroke", border)
+borderStroke.Thickness = 3
+borderStroke.Transparency = 0
+borderStroke.LineJoinMode = Enum.LineJoinMode.Round
 
-reachBtn.MouseButton1Click:Connect(function()
-	if reachActive then
-		if reachPart then
-			reachPart:Destroy()
-		end
-		reachBtn.Text = "✅ Activar Reach"
-	else
-		-- Crear el reach
-		local leg = Character:FindFirstChild("RightFoot") or Character:FindFirstChild("Right Leg")
-		if leg then
-			reachPart = Instance.new("Part", Character)
-			reachPart.Size = Vector3.new(4, 4, 6)
-			reachPart.Transparency = 1
-			reachPart.Anchored = false
-			reachPart.CanCollide = false
-			reachPart.Massless = true
-			reachPart.Name = "ReachHitbox"
-			reachPart.Color = Color3.fromRGB(255, 0, 0)
-
-			local weld = Instance.new("WeldConstraint", reachPart)
-			weld.Part0 = reachPart
-			weld.Part1 = leg
-			reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -3)
-		end
-		reachBtn.Text = "❌ Desactivar Reach"
-	end
-	reachActive = not reachActive
+local hue = 0
+RunService.Heartbeat:Connect(function()
+    hue = (hue + 1) % 360
+    borderStroke.Color = Color3.fromHSV(hue/360, 1, 1)
 end)
 
--- Mostrar GUI al tocar texto
+-- Título
+local title = Instance.new("TextLabel", mainFrame)
+title.Size = UDim2.new(1, 0, 0, 30)
+title.Position = UDim2.new(0, 0, 0, 5)
+title.BackgroundTransparency = 1
+title.Text = "Tridente KT7"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 24
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextStrokeTransparency = 0.6
+
+-- Label alcance
+local label = Instance.new("TextLabel", mainFrame)
+label.Size = UDim2.new(1, -40, 0, 25)
+label.Position = UDim2.new(0, 10, 0, 45)
+label.BackgroundTransparency = 1
+label.Text = "Alcance (Reach):"
+label.Font = Enum.Font.GothamSemibold
+label.TextSize = 16
+label.TextColor3 = Color3.fromRGB(200, 200, 200)
+label.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Input alcance
+local reachInput = Instance.new("TextBox", mainFrame)
+reachInput.Size = UDim2.new(0, 80, 0, 25)
+reachInput.Position = UDim2.new(1, -90, 0, 45)
+reachInput.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+reachInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+reachInput.Font = Enum.Font.Gotham
+reachInput.TextSize = 16
+reachInput.Text = "6"
+reachInput.ClearTextOnFocus = false
+reachInput.TextXAlignment = Enum.TextXAlignment.Center
+
+-- Botón activar/desactivar
+local reachBtn = Instance.new("TextButton", mainFrame)
+reachBtn.Size = UDim2.new(1, -20, 0, 40)
+reachBtn.Position = UDim2.new(0, 10, 0, 80)
+reachBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+reachBtn.TextColor3 = Color3.new(1, 1, 1)
+reachBtn.Font = Enum.Font.GothamBold
+reachBtn.TextSize = 20
+reachBtn.Text = "✅ Activar Reach"
+
+local reachActive = false
+local reachPart
+local weld
+
+reachBtn.MouseButton1Click:Connect(function()
+    if reachActive then
+        if reachPart then
+            reachPart:Destroy()
+            reachPart = nil
+        end
+        if weld then
+            weld:Destroy()
+            weld = nil
+        end
+        reachBtn.Text = "✅ Activar Reach"
+        reachActive = false
+    else
+        local leg = Character:FindFirstChild("RightFoot") or Character:FindFirstChild("Right Leg")
+        if leg then
+            local sizeValue = tonumber(reachInput.Text)
+            if not sizeValue or sizeValue < 1 then
+                sizeValue = 6 -- valor por defecto
+            end
+            reachPart = Instance.new("Part", Character)
+            reachPart.Size = Vector3.new(4, 4, sizeValue)
+            reachPart.Transparency = 1
+            reachPart.Anchored = false
+            reachPart.CanCollide = false -- SIN colisión
+            reachPart.Massless = true
+            reachPart.Name = "ReachHitbox"
+            reachPart.Color = Color3.fromRGB(255, 0, 0)
+            
+            weld = Instance.new("WeldConstraint", reachPart)
+            weld.Part0 = reachPart
+            weld.Part1 = leg
+            
+            reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -sizeValue/2)
+        end
+        reachBtn.Text = "❌ Desactivar Reach"
+        reachActive = true
+    end
+end)
+
 openText.MouseButton1Click:Connect(function()
-	mainFrame.Visible = not mainFrame.Visible
+    mainFrame.Visible = not mainFrame.Visible
 end)
