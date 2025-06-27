@@ -2,10 +2,10 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local leftLeg = character:WaitForChild("Left Leg")
 
-local alcance = 10 -- alcance en studs
+local alcance = 10
 local activo = true
 
--- Crear la parte verde que muestra alcance
+-- Crear la parte verde que marca alcance
 local alcancePart = Instance.new("Part")
 alcancePart.Size = Vector3.new(alcance, alcance, alcance)
 alcancePart.Transparency = 0.5
@@ -16,7 +16,6 @@ alcancePart.Material = Enum.Material.Neon
 alcancePart.Name = "AlcanceVisualizer"
 alcancePart.Parent = workspace
 
--- Actualizar posición para que siga la pierna
 game:GetService("RunService").RenderStepped:Connect(function()
     if activo and leftLeg then
         alcancePart.CFrame = leftLeg.CFrame
@@ -25,8 +24,10 @@ game:GetService("RunService").RenderStepped:Connect(function()
     end
 end)
 
--- Botón simple en pantalla para "disparar"
+-- Crear GUI botón para móvil y PC
 local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+screenGui.Name = "AlcanceGui"
+
 local boton = Instance.new("TextButton", screenGui)
 boton.Size = UDim2.new(0, 150, 0, 50)
 boton.Position = UDim2.new(0, 10, 0, 10)
@@ -36,6 +37,7 @@ boton.TextColor3 = Color3.new(1,1,1)
 boton.Font = Enum.Font.SourceSansBold
 boton.TextSize = 24
 
+-- Función que aplica fuerza al balón
 local function patearBalon(balon)
     if balon and balon:IsA("BasePart") then
         local bodyVelocity = Instance.new("BodyVelocity")
@@ -47,10 +49,10 @@ local function patearBalon(balon)
     end
 end
 
-boton.MouseButton1Click:Connect(function()
+-- Mejor evento para móvil y PC
+boton.Activated:Connect(function()
     if not activo then return end
-    -- Buscar el balón dentro del alcance (nombre "ball")
-    local ball = workspace:FindFirstChild("ball")
+    local ball = workspace:FindFirstChild("Ball")
     if ball and (ball.Position - leftLeg.Position).Magnitude <= alcance then
         patearBalon(ball)
     else
