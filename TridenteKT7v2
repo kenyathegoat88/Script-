@@ -1,90 +1,59 @@
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local leftLeg = character:WaitForChild("Left Leg") -- R6
+local leftLeg = character:WaitForChild("Left Leg")
 
-local alcance = 5
+local alcance = 10 -- alcance en studs
 local activo = true
 
--- Crear hitbox verde transparente
-local hitbox = Instance.new("Part")
-hitbox.Size = Vector3.new(alcance, alcance, alcance)
-hitbox.Transparency = 0.5
-hitbox.BrickColor = BrickColor.new("Bright green")
-hitbox.CanCollide = false
-hitbox.Anchored = false
-hitbox.Material = Enum.Material.Neon
-hitbox.Name = "LeftLegHitbox"
-hitbox.Parent = character
+-- Crear la parte verde que muestra alcance
+local alcancePart = Instance.new("Part")
+alcancePart.Size = Vector3.new(alcance, alcance, alcance)
+alcancePart.Transparency = 0.5
+alcancePart.BrickColor = BrickColor.new("Bright green")
+alcancePart.CanCollide = false
+alcancePart.Anchored = true
+alcancePart.Material = Enum.Material.Neon
+alcancePart.Name = "AlcanceVisualizer"
+alcancePart.Parent = workspace
 
--- Función para pegarle al balón
+-- Actualizar posición para que siga la pierna
+game:GetService("RunService").RenderStepped:Connect(function()
+    if activo and leftLeg then
+        alcancePart.CFrame = leftLeg.CFrame
+    else
+        alcancePart.CFrame = CFrame.new(0, -500, 0)
+    end
+end)
+
+-- Botón simple en pantalla para "disparar"
+local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+local boton = Instance.new("TextButton", screenGui)
+boton.Size = UDim2.new(0, 150, 0, 50)
+boton.Position = UDim2.new(0, 10, 0, 10)
+boton.Text = "Patear balón"
+boton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
+boton.TextColor3 = Color3.new(1,1,1)
+boton.Font = Enum.Font.SourceSansBold
+boton.TextSize = 24
+
 local function patearBalon(balon)
     if balon and balon:IsA("BasePart") then
         local bodyVelocity = Instance.new("BodyVelocity")
-        bodyVelocity.Velocity = (balon.Position - leftLeg.Position).Unit * 100
-        bodyVelocity.MaxForce = Vector3.new(50000, 50000, 50000)
+        local direccion = (balon.Position - leftLeg.Position).Unit
+        bodyVelocity.Velocity = direccion * 120
+        bodyVelocity.MaxForce = Vector3.new(1e5, 1e5, 1e5)
         bodyVelocity.Parent = balon
         game.Debris:AddItem(bodyVelocity, 0.2)
     end
 end
 
--- Actualizar posición de la hitbox y detectar contacto
-game:GetService("RunService").RenderStepped:Connect(function()
-    if activo and leftLeg and hitbox then
-        hitbox.CFrame = leftLeg.CFrame
-        hitbox.CanTouch = true
+boton.MouseButton1Click:Connect(function()
+    if not activo then return end
+    -- Buscar el balón dentro del alcance (nombre "ball")
+    local ball = workspace:FindFirstChild("ball")
+    if ball and (ball.Position - leftLeg.Position).Magnitude <= alcance then
+        patearBalon(ball)
     else
-        hitbox.CanTouch = false
-    end
-end)
-
-hitbox.Touched:Connect(function(hit)
-    if activo and hit.Name == "Ball" then
-        patearBalon(hit)
-    end
-end)
-
--- Crear GUI simple para activar/desactivar y cambiar alcance
-local screenGui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
-screenGui.Name = "AlcanceGui"
-
-local toggleButton = Instance.new("TextButton", screenGui)
-toggleButton.Size = UDim2.new(0, 150, 0, 40)
-toggleButton.Position = UDim2.new(0, 10, 0, 10)
-toggleButton.Text = "Alcance ON"
-toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-toggleButton.TextColor3 = Color3.new(1,1,1)
-toggleButton.Font = Enum.Font.SourceSansBold
-toggleButton.TextSize = 20
-
-local alcanceBox = Instance.new("TextBox", screenGui)
-alcanceBox.Size = UDim2.new(0, 100, 0, 30)
-alcanceBox.Position = UDim2.new(0, 10, 0, 60)
-alcanceBox.PlaceholderText = "Alcance (studs)"
-alcanceBox.Text = tostring(alcance)
-alcanceBox.ClearTextOnFocus = false
-alcanceBox.TextScaled = true
-
-toggleButton.MouseButton1Click:Connect(function()
-    activo = not activo
-    if activo then
-        toggleButton.Text = "Alcance ON"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        hitbox.Transparency = 0.5
-    else
-        toggleButton.Text = "Alcance OFF"
-        toggleButton.BackgroundColor3 = Color3.fromRGB(170, 0, 0)
-        hitbox.Transparency = 1
-    end
-end)
-
-alcanceBox.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local val = tonumber(alcanceBox.Text)
-        if val and val > 0 and val <= 20 then
-            alcance = val
-            hitbox.Size = Vector3.new(alcance, alcance, alcance)
-        else
-            alcanceBox.Text = tostring(alcance)
-        end
+        print("No hay balón en alcance")
     end
 end)
