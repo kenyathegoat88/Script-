@@ -1,197 +1,73 @@
--- LocalScript en StarterGui
-
+-- Tridente KT7 - Reach TPS Soccer (GUI Mobile)
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local RunService = game:GetService("RunService")
 
-local player = Players.LocalPlayer
-
--- ======= GUI =======
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "TridenteKT7Gui"
+-- GUI
+local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+screenGui.Name = "ReachGUI"
 screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Main Frame
-local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 300, 0, 120)
-mainFrame.Position = UDim2.new(0.5, -150, 0.1, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-mainFrame.BackgroundTransparency = 0.85
-mainFrame.BorderSizePixel = 3
-mainFrame.Parent = screenGui
+-- Botón ocultar/mostrar GUI
+local openText = Instance.new("TextButton", screenGui)
+openText.Text = "📂 Abrir Reach GUI"
+openText.Size = UDim2.new(0, 150, 0, 30)
+openText.Position = UDim2.new(0, 10, 0, 10)
+openText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+openText.TextColor3 = Color3.new(1, 1, 1)
+openText.Visible = true
 
-local hue = 0
+-- Marco principal
+local mainFrame = Instance.new("Frame", screenGui)
+mainFrame.Size = UDim2.new(0, 200, 0, 100)
+mainFrame.Position = UDim2.new(0.5, -100, 0.5, -50)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.Visible = true
 
--- Title Text
-local titleText = Instance.new("TextLabel")
-titleText.Size = UDim2.new(1, -10, 0, 30)
-titleText.Position = UDim2.new(0, 5, 0, 5)
-titleText.BackgroundTransparency = 1
-titleText.Text = "Tridente KT7"
-titleText.Font = Enum.Font.GothamBold
-titleText.TextSize = 24
-titleText.TextColor3 = Color3.new(0,0,0)
-titleText.Parent = mainFrame
-titleText.Active = true
-titleText.TextTransparency = 0
+-- Botón Reach
+local reachBtn = Instance.new("TextButton", mainFrame)
+reachBtn.Size = UDim2.new(1, -20, 0, 40)
+reachBtn.Position = UDim2.new(0, 10, 0, 30)
+reachBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+reachBtn.TextColor3 = Color3.new(1, 1, 1)
+reachBtn.Text = "✅ Activar Reach"
 
--- Minimized button (hidden initially)
-local minimizedFrame = Instance.new("Frame")
-minimizedFrame.Size = UDim2.new(0, 150, 0, 35)
-minimizedFrame.Position = UDim2.new(0.5, -75, 0.1, 0)
-minimizedFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
-minimizedFrame.BackgroundTransparency = 0.85
-minimizedFrame.BorderSizePixel = 3
-minimizedFrame.Visible = false
-minimizedFrame.Parent = screenGui
+-- Toggler
+local reachActive = false
+local reachPart
 
-local minimizedText = Instance.new("TextLabel")
-minimizedText.Size = UDim2.new(1, -10, 1, 0)
-minimizedText.Position = UDim2.new(0, 5, 0, 0)
-minimizedText.BackgroundTransparency = 1
-minimizedText.Text = "Tridente KT7"
-minimizedText.Font = Enum.Font.GothamBold
-minimizedText.TextSize = 20
-minimizedText.TextColor3 = Color3.new(0,0,0)
-minimizedText.Parent = minimizedFrame
-minimizedText.Active = true
+reachBtn.MouseButton1Click:Connect(function()
+	if reachActive then
+		if reachPart then
+			reachPart:Destroy()
+		end
+		reachBtn.Text = "✅ Activar Reach"
+	else
+		-- Crear el reach
+		local leg = Character:FindFirstChild("RightFoot") or Character:FindFirstChild("Right Leg")
+		if leg then
+			reachPart = Instance.new("Part", Character)
+			reachPart.Size = Vector3.new(4, 4, 6)
+			reachPart.Transparency = 1
+			reachPart.Anchored = false
+			reachPart.CanCollide = false
+			reachPart.Massless = true
+			reachPart.Name = "ReachHitbox"
+			reachPart.Color = Color3.fromRGB(255, 0, 0)
 
--- Reach Label
-local reachLabel = Instance.new("TextLabel")
-reachLabel.Size = UDim2.new(0, 150, 0, 25)
-reachLabel.Position = UDim2.new(0, 10, 0, 45)
-reachLabel.BackgroundTransparency = 1
-reachLabel.Text = "Reach: 10"
-reachLabel.Font = Enum.Font.Gotham
-reachLabel.TextSize = 18
-reachLabel.TextColor3 = Color3.new(0,0,0)
-reachLabel.TextXAlignment = Enum.TextXAlignment.Left
-reachLabel.Parent = mainFrame
-
--- Reach Slider Frame
-local sliderFrame = Instance.new("Frame")
-sliderFrame.Size = UDim2.new(0, 250, 0, 25)
-sliderFrame.Position = UDim2.new(0, 10, 0, 75)
-sliderFrame.BackgroundColor3 = Color3.fromRGB(220,220,220)
-sliderFrame.BorderSizePixel = 1
-sliderFrame.Parent = mainFrame
-
-local sliderBar = Instance.new("Frame")
-sliderBar.Size = UDim2.new(0.3, 0, 1, 0) -- initial 30%
-sliderBar.BackgroundColor3 = Color3.fromRGB(100,100,255)
-sliderBar.BorderSizePixel = 0
-sliderBar.Parent = sliderFrame
-
-local sliderButton = Instance.new("TextButton")
-sliderButton.Size = UDim2.new(0, 20, 1, 0)
-sliderButton.Position = UDim2.new(0.3, -10, 0, 0)
-sliderButton.BackgroundColor3 = Color3.fromRGB(80,80,200)
-sliderButton.BorderSizePixel = 0
-sliderButton.Text = ""
-sliderButton.Parent = sliderFrame
-
--- Close button
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 25, 0, 25)
-closeButton.Position = UDim2.new(1, -30, 0, 5)
-closeButton.BackgroundColor3 = Color3.fromRGB(255, 100, 100)
-closeButton.Text = "X"
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextSize = 20
-closeButton.TextColor3 = Color3.new(1,1,1)
-closeButton.Parent = mainFrame
-
--- Minimize button
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Size = UDim2.new(0, 25, 0, 25)
-minimizeButton.Position = UDim2.new(1, -60, 0, 5)
-minimizeButton.BackgroundColor3 = Color3.fromRGB(255, 200, 100)
-minimizeButton.Text = "-"
-minimizeButton.Font = Enum.Font.GothamBold
-minimizeButton.TextSize = 25
-minimizeButton.TextColor3 = Color3.new(1,1,1)
-minimizeButton.Parent = mainFrame
-
--- ======= Variables =======
-local reachDistance = 10 -- default
-
--- ======= Color cycling for border =======
-RunService.Heartbeat:Connect(function()
-    hue = (hue + 1) % 360
-    local color = Color3.fromHSV(hue/360, 1, 1)
-    mainFrame.BorderColor3 = color
-    minimizedFrame.BorderColor3 = color
+			local weld = Instance.new("WeldConstraint", reachPart)
+			weld.Part0 = reachPart
+			weld.Part1 = leg
+			reachPart.CFrame = leg.CFrame * CFrame.new(0, 0, -3)
+		end
+		reachBtn.Text = "❌ Desactivar Reach"
+	end
+	reachActive = not reachActive
 end)
 
--- ======= Slider behavior =======
-local dragging = false
-
-sliderButton.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = true
-    end
-end)
-
-sliderButton.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-        dragging = false
-    end
-end)
-
-sliderFrame.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-        local relativeX = math.clamp(input.Position.X - sliderFrame.AbsolutePosition.X, 0, sliderFrame.AbsoluteSize.X)
-        local percent = relativeX / sliderFrame.AbsoluteSize.X
-        sliderBar.Size = UDim2.new(percent, 0, 1, 0)
-        sliderButton.Position = UDim2.new(percent, -10, 0, 0)
-        reachDistance = math.floor(percent * 30) + 1 -- 1 a 30 studs
-        reachLabel.Text = "Reach: "..reachDistance
-    end
-end)
-
--- ======= Minimize & Close button =======
-minimizeButton.MouseButton1Click:Connect(function()
-    mainFrame.Visible = false
-    minimizedFrame.Visible = true
-end)
-
-closeButton.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
-end)
-
-minimizedText.MouseButton1Click:Connect(function()
-    minimizedFrame.Visible = false
-    mainFrame.Visible = true
-end)
-
--- ======= Reach logic adaptado para móvil =======
-local function hitBall()
-    local ball = workspace:FindFirstChild("Ball")
-    if ball and ball:IsA("BasePart") then
-        local char = player.Character
-        if char and char:FindFirstChild("HumanoidRootPart") then
-            local hrp = char.HumanoidRootPart
-            local dist = (ball.Position - hrp.Position).Magnitude
-            if dist <= reachDistance then
-                local direction = (ball.Position - hrp.Position).Unit
-                if ball:FindFirstChild("BodyVelocity") then
-                    ball.BodyVelocity.Velocity = direction * 100
-                else
-                    local bv = Instance.new("BodyVelocity")
-                    bv.Velocity = direction * 100
-                    bv.MaxForce = Vector3.new(100000,100000,100000)
-                    bv.Parent = ball
-                    game.Debris:AddItem(bv, 0.3)
-                end
-            end
-        end
-    end
-end
-
--- Para móvil, detectar cuando el jugador toca la pantalla (tap)
-UserInputService.TouchTap:Connect(function(touchPositions, gameProcessedEvent)
-    if not gameProcessedEvent then
-        hitBall()
-    end
+-- Mostrar GUI al tocar texto
+openText.MouseButton1Click:Connect(function()
+	mainFrame.Visible = not mainFrame.Visible
 end)
