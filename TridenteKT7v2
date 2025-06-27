@@ -8,28 +8,27 @@ local screenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"
 screenGui.Name = "TridenteKT7ReachGUI"
 screenGui.ResetOnSpawn = false
 
--- Botón para abrir GUI cuando minimizada o cerrada
 local openText = Instance.new("TextButton", screenGui)
-openText.Text = "👹 TridenteKT7"
-openText.Size = UDim2.new(0, 150, 0, 30)
+openText.Text = "👹KT7"
+openText.Size = UDim2.new(0, 160, 0, 40)
 openText.Position = UDim2.new(0, 10, 0, 10)
 openText.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 openText.TextColor3 = Color3.new(1, 1, 1)
 openText.Font = Enum.Font.GothamBold
-openText.TextSize = 14
+openText.TextSize = 16
 openText.Visible = false
 openText.AutoButtonColor = false
 
 local mainFrame = Instance.new("Frame", screenGui)
-mainFrame.Size = UDim2.new(0, 320, 0, 230)
-mainFrame.Position = UDim2.new(0.5, -160, 0.5, -115)
+mainFrame.Size = UDim2.new(0, 340, 0, 260)
+mainFrame.Position = UDim2.new(0.5, -170, 0.5, -130)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 mainFrame.BackgroundTransparency = 0.15
 mainFrame.BorderSizePixel = 0
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Visible = true
 
--- Variables para arrastrar GUI
+-- Variables para arrastrar GUI en móvil y PC
 local dragging, dragInput, dragStart, startPos
 local function updatePosition(input)
     local delta = input.Position - dragStart
@@ -37,7 +36,7 @@ local function updatePosition(input)
                                   startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 end
 mainFrame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
         dragging = true
         dragStart = input.Position
         startPos = mainFrame.Position
@@ -47,7 +46,7 @@ mainFrame.InputBegan:Connect(function(input)
     end
 end)
 mainFrame.InputChanged:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
         dragInput = input
     end
 end)
@@ -57,44 +56,44 @@ end)
 
 -- Título
 local title = Instance.new("TextLabel", mainFrame)
-title.Size = UDim2.new(1, 0, 0, 35)
+title.Size = UDim2.new(1, 0, 0, 40)
 title.Position = UDim2.new(0, 0, 0, 5)
 title.BackgroundTransparency = 1
 title.Text = "Tridente KT7"
 title.Font = Enum.Font.GothamBold
-title.TextSize = 28
+title.TextSize = 32
 title.TextColor3 = Color3.fromRGB(255, 255, 255)
 title.TextStrokeTransparency = 0.6
 
 -- Subtítulo
 local subtitle = Instance.new("TextLabel", mainFrame)
-subtitle.Size = UDim2.new(1, 0, 0, 20)
-subtitle.Position = UDim2.new(0, 0, 0, 40)
+subtitle.Size = UDim2.new(1, 0, 0, 25)
+subtitle.Position = UDim2.new(0, 0, 0, 50)
 subtitle.BackgroundTransparency = 1
 subtitle.Text = "by kenya"
 subtitle.Font = Enum.Font.GothamItalic
-subtitle.TextSize = 18
+subtitle.TextSize = 20
 subtitle.TextColor3 = Color3.fromRGB(180, 180, 180)
 subtitle.TextStrokeTransparency = 0.8
 
--- Botones de minimizar y cerrar
+-- Botones minimizar y cerrar (más grandes para móvil)
 local btnMinimize = Instance.new("TextButton", mainFrame)
-btnMinimize.Size = UDim2.new(0, 60, 0, 25)
-btnMinimize.Position = UDim2.new(1, -140, 0, 10)
+btnMinimize.Size = UDim2.new(0, 80, 0, 30)
+btnMinimize.Position = UDim2.new(1, -180, 0, 10)
 btnMinimize.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
 btnMinimize.Text = "Minimizar"
 btnMinimize.Font = Enum.Font.GothamBold
-btnMinimize.TextSize = 14
+btnMinimize.TextSize = 16
 btnMinimize.TextColor3 = Color3.new(1,1,1)
 btnMinimize.AutoButtonColor = false
 
 local btnClose = Instance.new("TextButton", mainFrame)
-btnClose.Size = UDim2.new(0, 60, 0, 25)
-btnClose.Position = UDim2.new(1, -70, 0, 10)
+btnClose.Size = UDim2.new(0, 80, 0, 30)
+btnClose.Position = UDim2.new(1, -90, 0, 10)
 btnClose.BackgroundColor3 = Color3.fromRGB(150, 40, 40)
 btnClose.Text = "Cerrar"
 btnClose.Font = Enum.Font.GothamBold
-btnClose.TextSize = 14
+btnClose.TextSize = 16
 btnClose.TextColor3 = Color3.new(1,1,1)
 btnClose.AutoButtonColor = false
 
@@ -111,71 +110,68 @@ openText.MouseButton1Click:Connect(function()
     openText.Visible = false
 end)
 
--- Reach Label y TextBox
+-- Reach Label y TextBox (más grandes para móvil)
 local labelReach = Instance.new("TextLabel", mainFrame)
-labelReach.Size = UDim2.new(0.6, -10, 0, 25)
-labelReach.Position = UDim2.new(0, 10, 0, 70)
+labelReach.Size = UDim2.new(0.6, -10, 0, 30)
+labelReach.Position = UDim2.new(0, 10, 0, 80)
 labelReach.BackgroundTransparency = 1
 labelReach.Text = "Alcance (Reach):"
 labelReach.Font = Enum.Font.GothamSemibold
-labelReach.TextSize = 16
+labelReach.TextSize = 18
 labelReach.TextColor3 = Color3.fromRGB(200, 200, 200)
 labelReach.TextXAlignment = Enum.TextXAlignment.Left
 
 local inputReach = Instance.new("TextBox", mainFrame)
-inputReach.Size = UDim2.new(0.35, 0, 0, 25)
-inputReach.Position = UDim2.new(0.6, 0, 0, 70)
+inputReach.Size = UDim2.new(0.35, 0, 0, 30)
+inputReach.Position = UDim2.new(0.6, 0, 0, 80)
 inputReach.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 inputReach.TextColor3 = Color3.fromRGB(255, 255, 255)
 inputReach.Font = Enum.Font.Gotham
-inputReach.TextSize = 16
+inputReach.TextSize = 18
 inputReach.Text = "6"
 inputReach.ClearTextOnFocus = false
 inputReach.TextXAlignment = Enum.TextXAlignment.Center
 
--- Botón Reach
 local btnReach = Instance.new("TextButton", mainFrame)
-btnReach.Size = UDim2.new(1, -20, 0, 40)
-btnReach.Position = UDim2.new(0, 10, 0, 105)
+btnReach.Size = UDim2.new(1, -20, 0, 50)
+btnReach.Position = UDim2.new(0, 10, 0, 120)
 btnReach.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 btnReach.TextColor3 = Color3.new(1, 1, 1)
 btnReach.Font = Enum.Font.GothamBold
-btnReach.TextSize = 20
+btnReach.TextSize = 22
 btnReach.Text = "✅ Activar Reach"
 
--- Nuevo Servicio Label y TextBox
+-- Nuevo Servicio Label y TextBox (más grandes para móvil)
 local labelNew = Instance.new("TextLabel", mainFrame)
-labelNew.Size = UDim2.new(0.6, -10, 0, 25)
-labelNew.Position = UDim2.new(0, 10, 0, 150)
+labelNew.Size = UDim2.new(0.6, -10, 0, 30)
+labelNew.Position = UDim2.new(0, 10, 0, 180)
 labelNew.BackgroundTransparency = 1
 labelNew.Text = "Alcance (Nuevo Servicio):"
 labelNew.Font = Enum.Font.GothamSemibold
-labelNew.TextSize = 16
+labelNew.TextSize = 18
 labelNew.TextColor3 = Color3.fromRGB(200, 200, 200)
 labelNew.TextXAlignment = Enum.TextXAlignment.Left
 
 local inputNew = Instance.new("TextBox", mainFrame)
-inputNew.Size = UDim2.new(0.35, 0, 0, 25)
-inputNew.Position = UDim2.new(0.6, 0, 0, 150)
+inputNew.Size = UDim2.new(0.35, 0, 0, 30)
+inputNew.Position = UDim2.new(0.6, 0, 0, 180)
 inputNew.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 inputNew.TextColor3 = Color3.fromRGB(255, 255, 255)
 inputNew.Font = Enum.Font.Gotham
-inputNew.TextSize = 16
+inputNew.TextSize = 18
 inputNew.Text = "6"
 inputNew.ClearTextOnFocus = false
 inputNew.TextXAlignment = Enum.TextXAlignment.Center
 
--- Botón Nuevo Servicio
 local btnNew = Instance.new("TextButton", mainFrame)
-btnNew.Size = UDim2.new(1, -20, 0, 40)
-btnNew.Position = UDim2.new(0, 10, 0, 185)
+btnNew.Size = UDim2.new(1, -20, 0, 50)
+btnNew.Position = UDim2.new(0, 10, 0, 220)
 btnNew.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
 btnNew.TextColor3 = Color3.new(1, 1, 1)
 btnNew.Font = Enum.Font.GothamBold
-btnNew.TextSize = 20
+btnNew.TextSize = 22
 btnNew.Text = "✅ Activar Nuevo Servicio"
 
--- Variables y lógica para hitboxes
 local reachActive, newActive = false, false
 local reachPart, newPart
 local reachWeld, newWeld
