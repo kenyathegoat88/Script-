@@ -32,15 +32,16 @@ Reach.BackgroundColor3 = Color3.fromRGB(230, 230, 230)
 Reach.TextColor3 = Color3.fromRGB(0, 0, 0)
 Instance.new("UICorner", Reach).CornerRadius = UDim.new(0, 6)
 
-local React = Instance.new("TextButton", Frame)
-React.Text = "React"
-React.Position = UDim2.new(0.1, 0, 0, 90)
-React.Size = UDim2.new(0.8, 0, 0, 30)
-React.Font = Enum.Font.GothamBold
-React.TextSize = 18
-React.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
-React.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", React).CornerRadius = UDim.new(0, 6)
+-- Botón aplicar Reach
+local ApplyReachBtn = Instance.new("TextButton", Frame)
+ApplyReachBtn.Text = "Aplicar Reach"
+ApplyReachBtn.Position = UDim2.new(0.1, 0, 0, 90)
+ApplyReachBtn.Size = UDim2.new(0.8, 0, 0, 30)
+ApplyReachBtn.Font = Enum.Font.GothamBold
+ApplyReachBtn.TextSize = 18
+ApplyReachBtn.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+ApplyReachBtn.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", ApplyReachBtn).CornerRadius = UDim.new(0, 6)
 
 local Chest = Instance.new("TextBox", Frame)
 Chest.PlaceholderText = "Chest Reach (1-50)"
@@ -110,17 +111,23 @@ OpenBtn.MouseButton1Click:Connect(function()
 	OpenBtn.Visible = false
 end)
 
--- Hitbox para ambas piernas
+-- Variables para hitboxes
 local hitboxDer, hitboxIzq
 
 local function crearHitboxes(valor)
 	valor = tonumber(valor)
-	if not valor or valor < 1 or valor > 50 then return end
+	if not valor or valor < 1 or valor > 50 then
+		warn("Valor inválido para hitboxes: ".. tostring(valor))
+		return
+	end
 
 	local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 	local footR = char:FindFirstChild("RightFoot") or char:FindFirstChild("Right Leg") or char:FindFirstChild("RightLowerLeg")
 	local footL = char:FindFirstChild("LeftFoot") or char:FindFirstChild("Left Leg") or char:FindFirstChild("LeftLowerLeg")
-	if not footR or not footL then return end
+	if not footR or not footL then
+		warn("No se encontraron partes de pierna.")
+		return
+	end
 
 	if hitboxDer then hitboxDer:Destroy() end
 	if hitboxIzq then hitboxIzq:Destroy() end
@@ -150,14 +157,18 @@ local function crearHitboxes(valor)
 	hitboxIzq = crearHitbox(footL)
 end
 
--- Campo Reach activa hitboxes
-Reach.FocusLost:Connect(function(enterPressed)
-	if enterPressed then
-		crearHitboxes(Reach.Text)
+-- Botón para aplicar el Reach (funciona en móvil)
+ApplyReachBtn.MouseButton1Click:Connect(function()
+	local value = tonumber(Reach.Text)
+	if not value then
+		warn("Valor Reach inválido.")
+		return
 	end
+	value = math.clamp(value, 1, 50)
+	crearHitboxes(value)
 end)
 
--- Toggle visibilidad de hitboxes
+-- Toggle visibilidad hitboxes
 local visible = true
 ToggleBtn.MouseButton1Click:Connect(function()
 	visible = not visible
@@ -166,7 +177,7 @@ ToggleBtn.MouseButton1Click:Connect(function()
 	ToggleBtn.Text = visible and "Ocultar Hitboxes" or "Mostrar Hitboxes"
 end)
 
--- Función react pendiente
-React.MouseButton1Click:Connect(function()
-	warn("React activado (pendiente)")
-end)
+-- React (pendiente)
+-- React.MouseButton1Click:Connect(function()
+-- 	warn("React activado (pendiente)")
+-- end)
